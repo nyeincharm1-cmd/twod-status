@@ -1,15 +1,26 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const cors = require("cors");
 
 const app = express();
 const DATA_FILE = path.join(__dirname, "data.json");
 
-app.use(cors());
+// CORS Package မလိုဘဲ Android App က လှမ်းခေါ်လို့ရအောင် လက်ခံပေးမည့် Native Middleware
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    
+    // Android က Preflight (OPTIONS) request လှမ်းပို့ရင် OK ပြန်ပေးရန်
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 app.use(express.json());
 
-// Server စပွင့်ချိန်မှာ data.json ဖိုင် မရှိသေးရင် မူရင်းအချိန်တွေကို အလိုအလျောက် သွားသိမ်းပေးမယ်
+// Server စပွင့်ချိန်မှာ data.json ဖိုင် မရှိသေးရင် မူရင်းအချိန်တွေကို အလိုအလျောက် ဆောက်ပေးမယ်
 if (!fs.existsSync(DATA_FILE)) {
     const defaultData = {
         morning_open: "07:00 PM",
