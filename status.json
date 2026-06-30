@@ -1,5 +1,9 @@
 {
-  "status": "OPEN",
-  "open_time": "11:55",
-  "close_time": "15:55"
+  "morning_open": "12:45",
+  "morning_close": "15:55",
+  "morning_result": "16:30",
+
+  "evening_open": "16:31",
+  "evening_close": "23:55",
+  "evening_result": "00:01"
 }
