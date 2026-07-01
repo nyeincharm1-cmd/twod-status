@@ -21,7 +21,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Default Data
+// Create default data.json
 if (!fs.existsSync(DATA_FILE)) {
 
     fs.writeFileSync(
@@ -45,7 +45,8 @@ if (!fs.existsSync(DATA_FILE)) {
 
 }
 
-// GET STATUS
+// -------------------- GET STATUS --------------------
+
 app.get("/status", (req, res) => {
 
     try {
@@ -59,22 +60,43 @@ app.get("/status", (req, res) => {
             now.getMinutes();
 
         let status = "CLOSE";
+        let session = "none";
+        let reset_id = "";
 
         if (
-            (current >= data.morning_open_min &&
-                current <= data.morning_close_min)
-            ||
-            (current >= data.evening_open_min &&
-                current <= data.evening_close_min)
+            current >= data.morning_open_min &&
+            current <= data.morning_close_min
         ) {
 
             status = "OPEN";
+            session = "morning";
 
+        } else if (
+            current >= data.evening_open_min &&
+            current <= data.evening_close_min
+        ) {
+
+            status = "OPEN";
+            session = "evening";
+
+        }
+
+        const today =
+            now.getFullYear() +
+            "-" +
+            String(now.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(now.getDate()).padStart(2, "0");
+
+        if (session !== "none") {
+            reset_id = today + "-" + session;
         }
 
         res.json({
 
             status,
+            session,
+            reset_id,
 
             morning_open: data.morning_open,
             morning_close: data.morning_close,
@@ -89,6 +111,7 @@ app.get("/status", (req, res) => {
     } catch (e) {
 
         res.status(500).json({
+            success: false,
             error: e.message
         });
 
@@ -96,7 +119,8 @@ app.get("/status", (req, res) => {
 
 });
 
-// SAVE STATUS
+// -------------------- SAVE STATUS --------------------
+
 app.post("/status", (req, res) => {
 
     try {
@@ -113,11 +137,11 @@ app.post("/status", (req, res) => {
             evening_close: body.evening_close,
             evening_result: body.evening_result,
 
-            morning_open_min: body.morning_open_minutes,
-            morning_close_min: body.morning_close_minutes,
+            morning_open_min: body.morning_open_min,
+            morning_close_min: body.morning_close_min,
 
-            evening_open_min: body.evening_open_minutes,
-            evening_close_min: body.evening_close_minutes
+            evening_open_min: body.evening_open_min,
+            evening_close_min: body.evening_close_min
 
         };
 
@@ -143,5 +167,5 @@ app.post("/status", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`);
+    console.log("Server Running On Port " + PORT);
 });
